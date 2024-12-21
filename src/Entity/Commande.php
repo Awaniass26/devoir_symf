@@ -27,7 +27,7 @@ class Commande
     /**
      * @var Collection<int, CommandeArticle>
      */
-    #[ORM\OneToMany(targetEntity: CommandeArticle::class, mappedBy: 'commande')]
+    #[ORM\OneToMany(targetEntity: CommandeArticle::class, mappedBy: 'commande',cascade: ['persist'])]
     private Collection $commandeArticles;
 
     public function __construct()

@@ -30,7 +30,7 @@ class Client
     #[ORM\OneToMany(targetEntity: Commande::class, mappedBy: 'client')]
     private Collection $commandes;
 
-    #[ORM\Column(length: 15)]
+    #[ORM\Column(length: 15,unique:true)]
     private ?string $telephone = null;
 
     public function __construct()

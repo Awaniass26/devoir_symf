@@ -1,91 +1,79 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Créer une Commande
-{% endblock %}
+{% block title %}Créer une Commande{% endblock %}
 
 {% block body %}
-	<body class="bg-gray-100 p-10">
-		<div class="max-w-4xl mx-auto bg-white p-6 rounded-md shadow">
-			<div class="grid grid-cols-3 gap-4 mb-6">
-				<form method="POST" action="{{ path('commande_create') }}">
-					<input type="text" name="name" placeholder="Nom" class="border p-2 rounded w-full" value="{{ client ? client.nom : '' }}" disabled>
-					<input type="text" name="phone" placeholder="Téléphone" class="border p-2 rounded w-full" value="{{ client ? client.telephone : '' }}">
-					<input type="text" name="address" placeholder="Dakar | Point E | Villa001" class="border p-2 rounded w-full" value="{{ client ? client.adresse : '' }}" disabled>
-					<button type="submit" class="bg-blue-400 text-white px-6 py-2 rounded">Rechercher</button>
-				</form>
-			</div>
-			{% if client %}
-				<div class="border p-4 rounded mb-6">
-					<div class="grid grid-cols-5 gap-4 mb-4 items-center">
-						<form method="POST" action="{{ path('commande_create') }}">
-							<select class="border p-2 rounded w-full" name="articles[]" multiple>
-								{% for article in articles %}
-									<option value="{{ article.id }}">
-										{{ article.nom }}
-										-
-										{{ article.prix }}€ (Stock:
-										{{ article.quantite }})
-									</option>
-								{% endfor %}
-							</select>
-							<input type="number" name="quantity" value="1" class="border p-2 rounded w-full">
-							<input type="number" name="price" value="0.0" class="border p-2 rounded w-full">
-							<button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Ajouter</button>
-						</form>
+<body class="bg-gray-100 p-10">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-md shadow">
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <form method="POST" action="{{ path('commande_create') }}">
+                <input type="text" name="name" placeholder="Nom" class="border p-2 rounded w-full" value="{{ client ? client.nom : '' }}" disabled>
+                <input type="text" name="phone" placeholder="Téléphone" class="border p-2 rounded w-full" value="{{ client ? client.telephone : '' }}">
+                <input type="text" name="address" placeholder="Dakar | Point E | Villa001" class="border p-2 rounded w-full" value="{{ client ? client.adresse : '' }}" disabled>
+                <button type="submit" class="bg-blue-400 text-white px-6 py-2 rounded">Rechercher</button>
+            </form>
+        </div>
 
-					</div>
+        {% if client %}
+            <div class="border p-4 rounded mb-6">
+                <div class="grid grid-cols-5 gap-4 mb-4 items-center">
+                    <form method="POST" action="{{ path('commande_create') }}">
+                        <select class="border p-2 rounded w-full" name="articles[]" multiple>
+                            {% for article in articles %}
+                                <option value="{{ article.id }}">
+                                    {{ article.nom }} - {{ article.prix }}€ (Stock: {{ article.quantite }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <input type="number" name="quantity" value="1" class="border p-2 rounded w-full">
+                        <input type="number" name="price" value="0.0" class="border p-2 rounded w-full">
+                        <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Ajouter</button>
+                    </form>
+                </div>
 
-					<table class="w-full border-t">
-						<thead>
-							<tr class="border-b">
-								<th class="text-left p-2">Article</th>
-								<th class="text-left p-2">Prix</th>
-								<th class="text-left p-2">Quantité</th>
-								<th class="text-left p-2">Montant</th>
-								<th class="text-left p-2">Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{% for item in commande.getCommandeArticles() %}
-								<tr>
-									<td class="p-2">{{ item.article.nom }}</td>
-									<td class="p-2">{{ item.prix }}</td>
-									<td class="p-2">{{ item.quantite }}</td>
-									<td class="p-2">{{ item.prix * item.quantite }}</td>
-									<td
-										class="p-2">
-										<!-- Lien pour modifier l'article -->
-										<a href="{{ path('commande_update_article', {id: item.id}) }}" class="text-yellow-500">Modifier</a>
-										|
-										<!-- Lien pour supprimer l'article -->
-										<form action="{{ path('commande_delete_article', {id: item.id}) }}" method="POST" style="display:inline;">
-											<button type="submit" class="text-red-500">Supprimer</button>
-										</form>
-									</td>
-								</tr>
-							{% endfor %}
-						</tbody>
-					</table>
-				</div>
+                <table class="w-full border-t">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left p-2">Article</th>
+                            <th class="text-left p-2">Prix</th>
+                            <th class="text-left p-2">Quantité</th>
+                            <th class="text-left p-2">Montant</th>
+                            <th class="text-left p-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in commande.getCommandeArticles() %}
+                            <tr>
+                                <td class="p-2">{{ item.article.nom }}</td>
+                                <td class="p-2">{{ item.prix }}</td>
+                                <td class="p-2">{{ item.quantite }}</td>
+                                <td class="p-2">{{ item.prix * item.quantite }}</td>
+                                <td class="p-2">
+                                    <a href="{{ path('commande_update_article', {id: item.id}) }}" class="text-yellow-500">Modifier</a>
+                                    |
+                                    <form action="{{ path('commande_delete_article', {id: item.id}) }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="text-red-500">Supprimer</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-				<!-- Total de la commande -->
-				<div class="flex justify-between items-center">
-					<div class="text-2xl font-bold bg-blue-400 text-white px-6 py-4 rounded">
-						Total:
-						<span class="text-3xl">{{ total }}</span>
-					</div>
-					<!-- Validation de la commande -->
-					<form method="POST" action="{{ path('commande_create') }}">
-						<button type="submit" class="bg-blue-400 text-white px-6 py-2 rounded">Valider la Commande</button>
-					</form>
-				</div>
-			{% else %}
-				<!-- Si le client n'est pas trouvé, afficher un message et désactiver la partie commande -->
-				<div class="text-red-500 font-bold">
-					Client non trouvé. Veuillez vérifier le numéro de téléphone.
-				</div>
-			{% endif %}
-		</div>
-	</body>
-
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold bg-blue-400 text-white px-6 py-4 rounded">
+                    Total: <span class="text-3xl">{{ total }}</span>
+                </div>
+                <form method="POST" action="{{ path('commande_create') }}">
+                    <button type="submit" class="bg-blue-400 text-white px-6 py-2 rounded">Valider la Commande</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="text-red-500 font-bold">
+                Client non trouvé. Veuillez vérifier le numéro de téléphone.
+            </div>
+        {% endif %}
+    </div>
+</body>
 {% endblock %}

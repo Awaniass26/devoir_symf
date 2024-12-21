@@ -13,87 +13,83 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\CommandeArticle;
 
 
 class CommandeController extends AbstractController
 {
     
     #[Route('/commande', name: 'commande_create', methods: ["GET", "POST"])]
-    public function createCommande(
-        Request $request,
-        ClientRepository $clientRepository,
-        ArticleRepository $articleRepository,
-        EntityManagerInterface $em
-    ): Response {
-        $client = null;
-        $commande = new Commande();
-        $total = 0;
-    
-        $articlesDisponibles = $articleRepository->findAll();
-    
-        if ($request->isMethod('POST')) {
-            $clientPhone = $request->get('phone');
-            $client = $clientRepository->findOneBy(['telephone' => $clientPhone]);
-    
-            if ($client) {
-                $commande->setClient($client);
-                $commande->setDateAt(new \DateTimeImmutable());
-    
-                $articleIds = $request->get('articles');  
-                $quantities = $request->get('quantity');  
-                $prices = $request->get('price');  
-    
-                if (is_array($articleIds) && count($articleIds) > 0) {
-                    foreach ($articleIds as $index => $id) {
-                        $article = $articleRepository->find($id);
-                        $quantity = $quantities[$index];
-                        $price = $prices[$index];
-    
-                        if ($article && $article->getQuantite() >= $quantity) {
-                            $commandeArticle = new CommandeArticle();
-                            $commandeArticle->setArticle($article);
-                            $commandeArticle->setQuantite($quantity);
-                            $commandeArticle->setPrix($price);  
-    
-                            $commande->addCommandeArticle($commandeArticle);
-    
-                            $article->setQuantite($article->getQuantite() - $quantity);
-    
-                            $total += $quantity * $price;  
-                        }
-                    }
-    
-                    $commande->setMontantTotal($total);
-    
-                    $em->persist($commande);
-                    $em->flush();
-    
-                    return $this->render('commande/new.html.twig', [
-                        'commande' => $commande,
-                        'client' => $client,
-                        'articles' => $articlesDisponibles,
-                        'total' => $total
-                    ]);
-                }
-            } else {
-                return $this->render('commande/new.html.twig', [
-                    'client_not_found' => true,
-                    'commande' => $commande,
-                    'client' => $client,
-                    'articles' => $articlesDisponibles,
-                    'total' => $total
-                ]);
-            }
+public function createCommande(
+    Request $request,
+    ClientRepository $clientRepository,
+    ArticleRepository $articleRepository,
+    EntityManagerInterface $em
+): Response {
+    $client = null;
+    $commande = new Commande();
+    $total = 0;
+
+    $articlesDisponibles = $articleRepository->findAll();
+
+    if ($request->isMethod('POST') && $request->get('phone')) {
+        $clientPhone = $request->get('phone');
+        $client = $clientRepository->findOneBy(['telephone' => $clientPhone]);
+
+        if ($client) {
+            $commande->setClient($client);
+            $commande->setDateAt(new \DateTimeImmutable());
+        } else {
+            return $this->render('commande/new.html.twig', [
+                'client_not_found' => true,
+                'commande' => $commande,
+                'client' => $client,
+                'articles' => $articlesDisponibles,
+                'total' => $total
+            ]);
         }
-    
-        return $this->render('commande/new.html.twig', [
-            'commande' => $commande,
-            'client' => $client,
-            'articles' => $articlesDisponibles,
-            'total' => $total
-        ]);
     }
-    
+
+    if ($request->isMethod('POST') && $request->get('articles')) {
+        $articleIds = $request->get('articles');
+        $quantities = $request->get('quantity');
+        $prices = $request->get('price');
+
+        if (is_array($articleIds) && count($articleIds) > 0) {
+            foreach ($articleIds as $index => $id) {
+                $article = $articleRepository->find($id);
+                $quantity = $quantities[$index];
+                $price = $prices[$index];
+
+                if ($article && $article->getQuantite() >= $quantity) {
+                    $commandeArticle = new CommandeArticle();
+                    $commandeArticle->setArticle($article);
+                    $commandeArticle->setQuantite($quantity);
+                    $commandeArticle->setPrix($price);
+
+                    $commande->addCommandeArticle($commandeArticle);
+
+                    $article->setQuantite($article->getQuantite() - $quantity);
+
+                    $total += $quantity * $price;
+                }
+            }
+
+            $commande->setMontantTotal($total);
+
+            $em->persist($commande);
+            $em->flush();
+        }
+    }
+
+    return $this->render('commande/new.html.twig', [
+        'commande' => $commande,
+        'client' => $client,
+        'articles' => $articlesDisponibles,
+        'total' => $total
+    ]);
+}
+
     
     
      #[Route('/commande/delete_article/{id}', name:'commande_delete_article', methods:'POST')]
